@@ -1,0 +1,5 @@
+.idea/
+*.zip
+schemas/gschemas.compiled
+__pycache__/
+*.pyc

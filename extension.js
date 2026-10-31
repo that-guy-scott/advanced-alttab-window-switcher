@@ -25,6 +25,7 @@ import * as Util from './src/util.js';
 import * as SwitcherList from './src/switcherList.js';
 import * as SwitcherItems from './src/switcherItems.js';
 import * as WindowMenu from './src/windowMenu.js';
+import { BrowserTabs } from './src/browserTabs.js';
 
 import { Extension, gettext as _ } from 'resource:///org/gnome/shell/extensions/extension.js';
 
@@ -52,6 +53,11 @@ export default class AATWS extends Extension {
         Me.opt = new Settings.Options(Me);
         this._opt = Me.opt;
         this.Me = Me;
+        Me.browserTabs = new BrowserTabs({
+            getWindows: () => Util.getWindows(null, true),
+            activateWindow: (window, time) => Main.activateWindow(window, time),
+            getCurrentTime: () => global.get_current_time(),
+        });
 
         WindowSwitcherPopup.init(Me);
         SwitcherList.init(Me);
@@ -99,6 +105,7 @@ export default class AATWS extends Extension {
         SwitcherItems.cleanGlobal();
         WindowMenu.cleanGlobal();
 
+        this.Me.browserTabs.destroy();
         this._opt.destroy();
         this._opt = null;
         this.Me = null;

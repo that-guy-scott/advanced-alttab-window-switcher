@@ -146,3 +146,10 @@ Contributions are welcome and I will try my best to answer quickly to all sugges
 ## Donations
 If you like my work and want to keep me motivated, give me some feedback. 
 But you can also [buy me a coffee](https://buymeacoffee.com/georgdh).
+
+### Search browser tabs (optional)
+
+A browser companion can add open tab titles and URLs to AATWS search. Type `tabs`
+to browse shared tabs, or `tabs words` to narrow the list, then select a result to
+activate its tab. See [browser tab setup](browser-extension/README.md) for Firefox
+and Chromium installation instructions. Private tabs are excluded.

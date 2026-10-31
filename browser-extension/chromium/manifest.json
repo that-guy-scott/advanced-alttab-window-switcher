@@ -1,0 +1,14 @@
+{
+  "name": "AATWS Browser Tabs",
+  "version": "1.0.2",
+  "description": "Search and activate browser tabs from AATWS.",
+  "permissions": [
+    "tabs",
+    "nativeMessaging",
+    "favicon"
+  ],
+  "manifest_version": 3,
+  "background": {
+    "service_worker": "background.js"
+  }
+}

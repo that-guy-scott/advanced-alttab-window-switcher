@@ -16,7 +16,7 @@ import Meta from 'gi://Meta';
 
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as SwitcherPopup from 'resource:///org/gnome/shell/ui/switcherPopup.js';
-import { AppIcon, WindowIcon, SysActionIcon, ShowAppsIcon } from './switcherItems.js';
+import { AppIcon, WindowIcon, SysActionIcon, ShowAppsIcon, BrowserTabIcon } from './switcherItems.js';
 
 // gettext
 let _;
@@ -66,7 +66,7 @@ export const SwitcherList = GObject.registerClass({
         let showAppsIcon;
         let showAppsItemBox;
         const dashMode = this._switcherParams.dashMode;
-        if (!items[0].get_title && (!dashMode && this._opt.INCLUDE_SHOW_APPS_ICON || (dashMode && opt.DASH_APP_INCLUDE_APPS_ICON))) {
+        if (!items[0].get_title && !items[0]._isBrowserTab && (!dashMode && this._opt.INCLUDE_SHOW_APPS_ICON || (dashMode && opt.DASH_APP_INCLUDE_APPS_ICON))) {
             showAppsIcon = this._getShowAppsIcon();
             if (this._switcherParams.reverseOrder) {
                 showAppsItemBox = this.addItem(showAppsIcon, showAppsIcon.titleLabel);
@@ -77,7 +77,9 @@ export const SwitcherList = GObject.registerClass({
         for (let i = 0; i < items.length; i++) {
             let item = items[i];
             let icon;
-            if (item.get_title) {
+            if (item._isBrowserTab) {
+                icon = new BrowserTabIcon(item, i, this._switcherParams, this._opt);
+            } else if (item.get_title) {
                 icon = new WindowIcon(item, i, this._switcherParams, this._opt);
             } else if (item.get_app_info) {
                 icon = new AppIcon(item, i, this._switcherParams, this._opt);

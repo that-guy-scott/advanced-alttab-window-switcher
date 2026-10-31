@@ -606,3 +606,37 @@ function _createHotKeyNumIcon(index, style) {
 
     return icon;
 }
+
+// Tabs are activation targets only; window management actions must not affect them.
+export const BrowserTabIcon = GObject.registerClass({
+    GTypeName: `BrowserTabIcon${Math.floor(Math.random() * 1000)}`,
+}, class BrowserTabIcon extends St.Widget {
+    _init(tab, index, params, opt) {
+        super._init({ reactive: true });
+        this._isBrowserTab = true;
+        this._id = tab.id;
+        this.activate = tab.activate;
+        this.titleLabel = new St.Label({ text: `${tab.title} — ${tab.browser}` });
+        this._appDetails = { description: tab.url };
+        this.icon = new IconGrid.BaseIcon(this.titleLabel.text, {
+            setSizeManually: true,
+            showLabel: true,
+            createIcon: size => {
+                if (tab.gicon)
+                    return new St.Icon({ gicon: tab.gicon, icon_size: size });
+                const family = /firefox/i.test(tab.browser)
+                    ? /firefox|librewolf|floorp|zen/i
+                    : /chrom(e|ium)|brave|vivaldi|edge|opera/i;
+                const app = Shell.AppSystem.get_default().get_running()
+                    .find(candidate => family.test(candidate.get_id() || candidate.get_name()));
+                return app?.create_icon_texture(size) ||
+                    new St.Icon({ icon_name: 'tab-new-symbolic', icon_size: size });
+            },
+        });
+        this.icon.setIconSize(opt.APP_MODE_ICON_SIZE);
+        this.icon.set_style_class_name(opt.colorStyle.TITLE_LABEL);
+        this.add_child(this.icon);
+        if (params.hotKeys && index < 12)
+            this.add_child(_createHotKeyNumIcon(index, opt.colorStyle.INDICATOR_OVERLAY));
+    }
+});

@@ -282,7 +282,7 @@ export class InputHandler {
             return;
         }
 
-        if (this._wsp._showingApps && selected.cachedWindows) {
+        if (this._wsp._showingApps && selected?.cachedWindows) {
             if (selected && selected.cachedWindows.length)
                 this._wsp._toggleSingleAppMode();
         } else if (this._wsp._singleApp) {

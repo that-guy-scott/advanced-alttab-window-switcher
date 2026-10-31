@@ -92,6 +92,15 @@ export class ListProvider {
             }
         }
 
+        // Browser tabs span all workspaces: the browser does not expose Meta.Windows.
+        const tabs = searchQuery && !this._singleApp
+            ? this._wsp._getBrowserTabs().filter(tab =>
+                this._match(`tabs ${tab.title} ${tab.url} ${tab.browser}`, searchQuery.replace(/^tabs(?:\s+|$)/i, '')))
+            : [];
+        if (/^tabs(?:\s|$)/i.test(searchQuery) && tabs.length)
+            return tabs;
+        itemList.push(...tabs);
+
         // if no windows/apps match the searchQuery and searching apps is allowed, try to find some apps instead
         if (itemList.length === 0 && this._opt.SEARCH_APPS === true && searchQuery) {
             itemList = this.getAppList(searchQuery);

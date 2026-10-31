@@ -598,7 +598,7 @@ export const WindowSwitcherPopup = {
             if (!this._showingApps) {
                 // if the first window in the list is the current one, select the second window
                 const firstWindow = this._reverseOrder ? this._items[this._items.length - 1].window : this._items[0].window;
-                if (firstWindow && firstWindow.get_id() === recentWindow.get_id())
+                if (firstWindow && firstWindow.get_id() === recentWindow?.get_id())
                     this._initialSelectionMode = Enum.SelectMode.SECOND;
                 else
                     this._initialSelectionMode = Enum.SelectMode.FIRST;
@@ -671,7 +671,7 @@ export const WindowSwitcherPopup = {
         const activeWs = global.workspace_manager.get_active_workspace();
         if (!reverse) {
             for (let i = 0; i < this._items.length; i++) {
-                if (this._items[i].window.get_workspace() === activeWs) {
+                if (this._items[i].window?.get_workspace() === activeWs) {
                     let index = i;
                     if (this._initialSelectionMode === Enum.SelectMode.SECOND && index + 1 < this._items.length)
                         index = i + 1;
@@ -682,7 +682,7 @@ export const WindowSwitcherPopup = {
             }
         } else {
             for (let i = this._items.length - 1; i >= 0; i--) {
-                if (this._items[i].window.get_workspace() === activeWs) {
+                if (this._items[i].window?.get_workspace() === activeWs) {
                     let index = i;
                     if (this._initialSelectionMode === Enum.SelectMode.SECOND && index > 0)
                         index = i - 1;
@@ -1033,6 +1033,10 @@ export const WindowSwitcherPopup = {
         childBox.set_origin(x, y);
     },
 
+    _getBrowserTabs() {
+        return Me.browserTabs.getTabs();
+    },
+
     _getAdjustedItemList() {
         let itemList = this._listProvider.getItemList(this._searchQuery);
 
@@ -1193,6 +1197,13 @@ export const WindowSwitcherPopup = {
 
         this._doNotShowWin = true;
         this._doNotUpdateOnNewWindow = true;
+        const tab = this._items[this._selectedIndex];
+        if (tab?._isBrowserTab) {
+            this._inputHandler.setInput('reset');
+            tab.activate();
+            this.fadeAndDestroy();
+            return;
+        }
         const selected = this._getSelectedTarget();
         const hasFocus = this._selectedHasFocus(selected);
 
@@ -1233,7 +1244,7 @@ export const WindowSwitcherPopup = {
     },
 
     _selectedHasFocus(selected) {
-        const window = selected.cachedWindows?.length ? selected.cachedWindows[0] : selected;
+        const window = selected?.cachedWindows?.length ? selected.cachedWindows[0] : selected;
         const focus = global.display.get_tab_list(0, null)[0];
         return window === focus;
     },
@@ -1386,7 +1397,7 @@ export const WindowSwitcherPopup = {
         for (let i = 0; i < this._items.length; i++) {
             if (this._items[i]._isShowAppsIcon)
                 continue;
-            if (this._items[i][pt].get_id() === id)
+            if (this._items[i][pt]?.get_id() === id)
                 return i;
         }
 
@@ -1438,6 +1449,8 @@ export const WindowSwitcherPopup = {
     },
 
     _selectNextApp(selectedIndex) {
+        if (this._items.some(item => item._isBrowserTab))
+            return _shiftPressed() ? this._previous() : this._next();
         let lastIndex, step;
         if (_shiftPressed()) {
             lastIndex = 0;

@@ -55,7 +55,7 @@ export const Actions = class {
 
         if (!metaWin && selected?.cachedWindows)
             metaWin = selected.cachedWindows[0];
-        else if (selected.get_title)
+        else if (selected?.get_title)
             metaWin = selected;
 
         return metaWin ?? null;
@@ -102,7 +102,7 @@ export const Actions = class {
             winList = selected.cachedWindows;
         } else {
             let app = Util.getWindowApp(selected).get_id();
-            winList = items.filter(i => Util.getWindowApp(i.window).get_id() === app).map(i => i.window);
+            winList = items.filter(i => i.window && Util.getWindowApp(i.window).get_id() === app).map(i => i.window);
         }
         let time = global.get_current_time();
         for (let win of winList) {
@@ -177,9 +177,9 @@ export const Actions = class {
         let selected = this._getSelectedTarget();
 
         let winList;
-        if (selected.cachedWindows)
+        if (selected?.cachedWindows)
             winList = selected.cachedWindows;
-        else if (selected.get_title)
+        else if (selected?.get_title)
             winList = [selected];
 
         if (!winList)
