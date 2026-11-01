@@ -56,6 +56,7 @@ export class BrowserTabs {
                 id: `${sender}:${tab.id}`,
                 title: String(tab.title || tab.url || 'Browser tab').slice(0, 2000),
                 url: String(tab.url || '').slice(0, 4000),
+                windowTitle: String(tab.windowTitle || '').slice(0, 2000),
                 browser,
                 gicon: icons.get(tab.iconKey) || null,
                 lastAccessed: Number(tab.lastAccessed) || 0,

@@ -84,6 +84,8 @@ try {
     await update(client, { browser: 'Chromium', tabs: [
         { id: 10, title: 'Amazon', windowId: 8, windowTitle: 'ChatGPT' },
     ] });
+    assert(service.getTabs().find(tab => tab.title === 'Amazon').windowTitle === 'ChatGPT',
+        'selected tab title survives the snapshot for search deduplication');
     service.getTabs().find(tab => tab.title === 'Amazon').activate();
     await wait(100);
     assert(focused.length === 0, 'wait until the browser confirms tab selection');

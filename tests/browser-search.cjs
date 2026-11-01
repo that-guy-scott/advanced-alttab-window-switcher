@@ -5,7 +5,9 @@ const vm = require('node:vm');
 // Exercise the real list provider with desktop dependencies replaced by fixtures.
 const source = fs.readFileSync('src/listProvider.js', 'utf8')
     .replace(/^import .*;$/gm, '').replace('export class ListProvider', 'class ListProvider');
-const context = vm.createContext({ Enum: { FilterMode: { ALL: 1 } }, Util: { getWindows: () => [{}] } });
+let windows = [];
+const context = vm.createContext({ Enum: { FilterMode: { ALL: 1 } }, Util: { getWindows: () => windows } });
+vm.runInContext(fs.readFileSync('src/browserWindow.js', 'utf8').replace('export function', 'function'), context);
 vm.runInContext(`${source}\nglobalThis.Provider = ListProvider;`, context);
 const tabs = [
     { title: 'Résumé', url: 'https://example.org', browser: 'Firefox' },
@@ -32,6 +34,37 @@ assert.equal(provider.getItemList('tabs').length, 1, 'single app mode excludes t
 wsp._singleApp = null;
 wsp._showApps = true;
 assert.equal(provider.getItemList('work').at(-1).title, 'Work', 'app mode includes tabs');
+
+const chrome = { get_title: () => 'Work - Google Chrome', get_wm_class: () => 'Google-chrome' };
+const firefox = { get_title: () => 'Work — Mozilla Firefox', get_wm_class: () => 'firefox' };
+const editor = { get_title: () => 'Work', get_wm_class: () => 'code' };
+windows = [chrome, firefox, editor];
+provider.getCustomWindowList = () => [...windows];
+wsp._showApps = false;
+tabs[1].windowTitle = 'Work';
+let results = provider.getItemList('work');
+assert.ok(!results.includes(chrome), 'selected tab replaces its browser window in search');
+assert.ok(results.includes(tabs[1]), 'keep the tab result with its URL and favicon');
+assert.ok(results.includes(firefox), 'same title in another browser is preserved');
+assert.ok(results.includes(editor), 'same title in a non-browser app is preserved');
+assert.equal(provider.getItemList('').length, 3, 'ordinary Alt-Tab keeps all browser windows');
+tabs[1].windowTitle = 'Other tab';
+assert.ok(provider.getItemList('work').includes(chrome), 'background tab does not replace the window');
+delete tabs[1].windowTitle;
+assert.ok(provider.getItemList('work').includes(chrome), 'missing snapshot metadata preserves windows');
+tabs[1].windowTitle = 'Work';
+const otherProfile = { ...chrome };
+windows.push(otherProfile);
+results = provider.getItemList('work');
+assert.ok(results.includes(chrome) && results.includes(otherProfile), 'ambiguous profiles preserve both windows');
+windows.pop();
+wsp._singleApp = {};
+assert.ok(provider.getItemList('work').includes(chrome), 'single-app mode keeps browser windows');
+wsp._singleApp = null;
+wsp._showApps = true;
+const app = { app: true };
+provider.getAppList = () => [app];
+assert.ok(provider.getItemList('work').includes(app), 'application results remain available');
 console.log('Browser tab search tests passed');
 
 (async () => {

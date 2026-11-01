@@ -15,6 +15,7 @@ import * as SystemActions from 'resource:///org/gnome/shell/misc/systemActions.j
 
 import * as Enum from './enum.js';
 import * as Util from './util.js';
+import { findBrowserWindow } from './browserWindow.js';
 
 export class ListProvider {
     constructor(wsp, opt) {
@@ -99,6 +100,16 @@ export class ListProvider {
             : [];
         if (/^tabs(?:\s|$)/i.test(searchQuery) && tabs.length)
             return tabs;
+        if (tabs.length) {
+            // A browser window repeats its selected tab's title. Prefer the tab
+            // result, but keep windows whose selected tab isn't in the results.
+            const windows = Util.getWindows(null, this._opt.INCLUDE_MODALS);
+            const duplicates = new Set(tabs
+                .filter(tab => tab.title === tab.windowTitle)
+                .map(tab => findBrowserWindow(windows, tab.browser, tab.windowTitle))
+                .filter(window => window));
+            itemList = itemList.filter(item => !duplicates.has(item));
+        }
         itemList.push(...tabs);
 
         // if no windows/apps match the searchQuery and searching apps is allowed, try to find some apps instead
