@@ -135,6 +135,14 @@
   background-color: rgb(255, 0, 0);
 }
 
+.window-preview-caption {
+  color: white;
+  background-color: rgba(24, 24, 24, 0.95);
+  border-radius: 8px;
+  margin-top: 8px;
+  padding: 6px 12px;
+}
+
 .switcher-list-dark, .caption-label-dark, .search-label-dark, .title-label-dark {
   background-color: rgba(24, 24, 24, 0.95);
   border-color: rgba(63, 63, 63, 0.8);

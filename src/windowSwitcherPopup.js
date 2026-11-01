@@ -1916,11 +1916,15 @@ export const WindowSwitcherPopup = {
     },
 
     _showPreview(toggle = false) {
-        let selected = this._getSelectedTarget();
-        if (!selected || selected._isShowAppsIcon)
-            return;
-
         if (toggle && this._winPreview) {
+            this._destroyWinPreview();
+            return;
+        }
+
+        const item = this._items[this._selectedIndex];
+        const selected = item?._isBrowserTab
+            ? item.getPreviewWindow?.() : this._getSelectedTarget();
+        if (!selected || selected._isShowAppsIcon) {
             this._destroyWinPreview();
             return;
         }
@@ -1944,6 +1948,7 @@ export const WindowSwitcherPopup = {
         }
 
         this._winPreview.window = metaWin;
+        this._winPreview.caption = item?._isBrowserTab ? _('Containing browser window') : '';
     },
 
     _showWindow() {

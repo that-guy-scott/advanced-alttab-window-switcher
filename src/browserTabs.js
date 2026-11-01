@@ -60,6 +60,8 @@ export class BrowserTabs {
                 browser,
                 gicon: icons.get(tab.iconKey) || null,
                 lastAccessed: Number(tab.lastAccessed) || 0,
+                // Resolve only for previews. Tabs stay separate from window-action targets.
+                getPreviewWindow: () => findBrowserWindow(this._getWindows(), browser, tab.windowTitle),
                 activate: () => this._activate(sender, browser, tab),
             }));
             this._clients.set(sender, tabs);

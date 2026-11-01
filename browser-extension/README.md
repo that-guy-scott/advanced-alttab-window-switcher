@@ -49,7 +49,14 @@ browser window/tab IDs, favicons and access timestamps travel over native messag
 and the user's session D-Bus. Private/incognito tabs are excluded. Each browser
 profile's native-host process has its own D-Bus identity, so tab IDs cannot collide.
 Closing its connection removes its results; disabling AATWS clears all snapshots.
-Window actions (close, move, preview, etc.) do not apply to tab results.
+Window actions (close, move, etc.) do not apply to tab results. Large selected-result
+previews show the tab's containing browser window when it can be identified
+uniquely. The preview is labeled **Containing browser window**: for background tabs,
+it shows that window's currently selected tab. Browsing results does not change
+the browser's selected tab; Enter or a click still activates the chosen tab.
+Missing or ambiguous window matches have no preview.
+Previews use GNOME's existing window surface; the companion does not capture or
+save screenshots and needs no additional permissions.
 
 To uninstall, remove the companion in your browser, delete its
 `org.gnome.shell.extensions.aatws.json` native-host manifests from the directories

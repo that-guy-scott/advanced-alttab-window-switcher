@@ -254,6 +254,14 @@ export const WindowPreview = GObject.registerClass({
         this._highlight = new St.Widget({ style_class: 'cycler-highlight' });
         this.add_child(this._highlight);
 
+        this._caption = new St.Label({
+            style_class: 'window-preview-caption',
+            x_align: Clutter.ActorAlign.CENTER,
+            y_align: Clutter.ActorAlign.START,
+            visible: false,
+        });
+        this.add_child(this._caption);
+
         let coordinate = Clutter.BindCoordinate.ALL;
         let constraint = new Clutter.BindConstraint({ coordinate });
         this._clone.bind_property('source', constraint, 'source', 0);
@@ -261,6 +269,11 @@ export const WindowPreview = GObject.registerClass({
         this.add_constraint(constraint);
 
         this.connect('destroy', this._onDestroy.bind(this));
+    }
+
+    set caption(text) {
+        this._caption.text = text;
+        this._caption.visible = !!text;
     }
 
     set window(w) {

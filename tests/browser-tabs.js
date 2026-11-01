@@ -76,6 +76,33 @@ try {
     const chrome = { get_title: () => 'ChatGPT - Google Chrome', get_wm_class: () => 'Google-chrome' };
     const firefox = { get_title: () => 'ChatGPT — Mozilla Firefox', get_wm_class: () => 'firefox' };
     windows.push(chrome, firefox);
+    const otherChrome = { get_title: () => 'Other - Google Chrome', get_wm_class: () => 'Google-chrome' };
+    windows.push(otherChrome);
+    await update(client, { browser: 'Chromium', tabs: [
+        { id: 10, title: 'ChatGPT', windowTitle: 'ChatGPT' },
+        { id: 11, title: 'Amazon', windowTitle: 'ChatGPT' },
+        { id: 12, title: 'ChatGPT' },
+        { id: 13, title: 'Amazon', windowTitle: 'Other' },
+        { id: 14, title: 'ChatGPT', windowTitle: 'Outdated title' },
+    ] });
+    const previewTabs = service.getTabs().filter(tab => tab.browser === 'Chromium');
+    assert(previewTabs[0].getPreviewWindow() === chrome, 'active tab can preview its live browser window');
+    assert(previewTabs[1].getPreviewWindow() === chrome, 'background tab previews its containing window');
+    assert(previewTabs[2].getPreviewWindow() === null, 'missing window title has no preview');
+    assert(previewTabs[3].getPreviewWindow() === otherChrome,
+        'same tab title in a different window previews the correct containing window');
+    assert(previewTabs[4].getPreviewWindow() === null, 'stale window titles have no preview');
+    windows.pop();
+    windows.push({ ...chrome });
+    assert(previewTabs[0].getPreviewWindow() === null && previewTabs[1].getPreviewWindow() === null,
+        'ambiguous browser windows have no live preview');
+    windows.pop();
+    windows.splice(0, 1);
+    assert(previewTabs[1].getPreviewWindow() === null,
+        'closed windows cannot be previewed, even with the same title in another browser');
+    windows.unshift(chrome);
+    await wait(50);
+    assert(activated === 1 && focused.length === 0, 'previewing does not activate tabs or focus windows');
     assert(findBrowserWindow(windows, 'Chromium', 'ChatGPT') === chrome,
         'identical tab titles in different browsers stay separate');
     const duplicate = { ...chrome };

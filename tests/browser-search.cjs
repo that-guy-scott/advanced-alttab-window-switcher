@@ -84,8 +84,10 @@ console.log('Browser tab search tests passed');
         runtime: { connectNative: () => port, getURL: path => `chrome-extension://test${path}` },
         tabs: {
             query: async () => [
-                { id: 1, title: 'Public', url: 'https://example.org', favIconUrl: 'https://example.org/icon.png' },
+                { id: 1, title: 'Public', active: true, windowId: 8, url: 'https://example.org', favIconUrl: 'https://example.org/icon.png' },
                 { id: 2, incognito: true, url: 'https://private.example', favIconUrl: 'https://private.example/icon.png' },
+                { id: 3, title: 'Background', windowId: 8, url: 'https://background.example.org' },
+                { id: 4, title: 'Other window', active: true, windowId: 9, url: 'https://other.example.org' },
             ],
             get: async id => ({ id, windowId: 8, title: 'Amazon' }),
             update: async id => { activated.push(id); return { id, windowId: 8, title: 'Amazon' }; },
@@ -103,7 +105,11 @@ console.log('Browser tab search tests passed');
         setTimeout: fn => { callbacks.timer = fn; } });
     vm.runInContext(fs.readFileSync('browser-extension/background.js', 'utf8'), sandbox);
     await callbacks.timer();
-    assert.equal(posted[0].tabs.length, 1, 'companion never publishes private tabs');
+    assert.equal(posted[0].tabs.length, 3, 'companion never publishes private tabs');
+    assert.equal(posted[0].tabs.find(tab => tab.id === 3).windowTitle, 'Public',
+        'background tab carries its containing window title for previews');
+    assert.equal(posted[0].tabs.find(tab => tab.id === 4).windowTitle, 'Other window',
+        'tabs in another window carry that window title');
     assert.equal(fetched.length, 1, 'only public tab favicon is requested');
     assert.equal(new URL(fetched[0]).protocol, 'chrome-extension:', 'favicon comes from browser cache');
     assert.equal(Object.keys(posted[0].icons).length, 1);

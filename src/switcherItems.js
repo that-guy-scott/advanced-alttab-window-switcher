@@ -616,6 +616,7 @@ export const BrowserTabIcon = GObject.registerClass({
         this._isBrowserTab = true;
         this._id = tab.id;
         this.activate = tab.activate;
+        this.getPreviewWindow = tab.getPreviewWindow;
         this.titleLabel = new St.Label({ text: `${tab.title} — ${tab.browser}` });
         this._appDetails = { description: tab.url };
         this.icon = new IconGrid.BaseIcon(this.titleLabel.text, {
