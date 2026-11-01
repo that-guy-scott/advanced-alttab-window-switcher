@@ -423,6 +423,18 @@ export const WindowSwitcherPopup = {
     },
 
     _resetNoModsTimeoutOrFinish(binding, mask) {
+        if (opt.REQUIRE_ENTER && this._keyboardTriggered) {
+            if (this._firstRun) {
+                this._modifierMask = !this._overlayKeyTriggered && opt.QUICK_SWITCH_TIMEOUT > 0
+                    ? primaryModifier(mask ?? this._modifierMask) : 0;
+            }
+
+            if (this._modifierMask && !(global.get_pointer()[2] & this._modifierMask))
+                return this._finishOnQuickRelease(this._firstRun);
+
+            return false;
+        }
+
         // There's a race condition; if the user released Alt before
         // we got the grab, then we won't be notified. (See
         // https://bugzilla.gnome.org/show_bug.cgi?id=596695 for
@@ -443,6 +455,21 @@ export const WindowSwitcherPopup = {
             this._resetNoModsTimeout();
         }
         return false;
+    },
+
+    _finishOnQuickRelease(releasedBeforeGrab = false) {
+        // Once Alt is released, subsequent typing and list updates stay in search mode.
+        this._modifierMask = 0;
+        if (this._overlayKeyTriggered || opt.QUICK_SWITCH_TIMEOUT <= 0 ||
+            this._searchQuery || this._secondarySearchToggle ||
+            (!releasedBeforeGrab && Date.now() - this._initTime >= opt.QUICK_SWITCH_TIMEOUT))
+            return false;
+
+        if (this._selectedIndex !== -1)
+            this._finish();
+        else
+            this.fadeAndDestroy();
+        return true;
     },
 
     _updateStyle() {
@@ -1354,6 +1381,10 @@ export const WindowSwitcherPopup = {
         if (this._noModsTimeoutId)
             GLib.source_remove(this._noModsTimeoutId);
 
+        this._noModsTimeoutId = 0;
+        if (opt.REQUIRE_ENTER && this._keyboardTriggered)
+            return;
+
         this._noModsTimeoutId = GLib.timeout_add(
             GLib.PRIORITY_DEFAULT,
             opt.NO_MODS_TIMEOUT,
@@ -1791,7 +1822,9 @@ export const WindowSwitcherPopup = {
                 let state = mods & this._modifierMask;
 
                 if (state === 0) {
-                    if (this._selectedIndex !== -1)
+                    if (opt.REQUIRE_ENTER && this._keyboardTriggered)
+                        this._finishOnQuickRelease();
+                    else if (this._selectedIndex !== -1)
                         this._finish();
                     else
                         this.fadeAndDestroy();

@@ -80,6 +80,17 @@
     <key name='switcher-popup-start-search' type='b'>
       <default>true</default>
     </key>
+    <key name='switcher-popup-require-enter' type='b'>
+      <default>true</default>
+      <summary>Keep keyboard-triggered switchers open until explicit activation</summary>
+      <description>Keep the switcher open after modifier release, except for quick switches within the quick-switch timeout. Press Enter to activate or Escape to dismiss.</description>
+    </key>
+    <key name='switcher-popup-quick-switch-timeout' type='i'>
+      <default>250</default>
+      <range min='0' max='1000'/>
+      <summary>Quick switch timeout in milliseconds</summary>
+      <description>With Require Enter enabled, releasing the shortcut modifier within this time activates the selected result. Holding longer keeps the switcher open for search. Set to 0 to always require Enter. Does not apply to the Super overlay key.</description>
+    </key>
     <key name='switcher-popup-position' type='i'>
       <default>2</default>
     </key>

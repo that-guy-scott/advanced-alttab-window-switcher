@@ -116,6 +116,8 @@ export const Options = class Options {
             switcherPopupPreviewSelected: ['int', 'switcher-popup-preview-selected'],
             switcherPopupUpDownAction: ['int', 'switcher-popup-up-down-action'],
             switcherPopupStartSearch: ['boolean', 'switcher-popup-start-search'],
+            switcherPopupRequireEnter: ['boolean', 'switcher-popup-require-enter'],
+            switcherPopupQuickSwitchTimeout: ['int', 'switcher-popup-quick-switch-timeout'],
             switcherPopupWrap: ['boolean', 'switcher-popup-wrap'],
             switcherPopupHotKeys: ['boolean', 'switcher-popup-hot-keys'],
             switcherPopupHoverSelect: ['boolean', 'switcher-popup-hover-select'],
@@ -323,6 +325,8 @@ export const Options = class Options {
         this.SEARCH_ALL            = this.get('winSwitcherPopupSearchAll');
         this.ITEM_CAPTIONS         = this.get('switcherPopupTooltipTitle');
         this.SEARCH_DEFAULT        = this.get('switcherPopupStartSearch');
+        this.REQUIRE_ENTER         = this.get('switcherPopupRequireEnter');
+        this.QUICK_SWITCH_TIMEOUT  = this.get('switcherPopupQuickSwitchTimeout');
         this.CAPTIONS_SCALE        = this.get('switcherPopupTooltipLabelScale') / 100;
         this.HOVER_SELECT          = this.get('switcherPopupHoverSelect');
         this.SYNC_FILTER           = this.get('switcherPopupSyncFilter');

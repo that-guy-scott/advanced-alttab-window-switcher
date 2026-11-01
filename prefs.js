@@ -128,6 +128,8 @@ export default class AATWS extends ExtensionPreferences {
             o.DefaultMonitor,
             o.ShowImmediately,
             o.SearchModeDefault,
+            o.RequireEnter,
+            o.QuickSwitchTimeout,
             o.SyncFilter,
             o.WraparoundSelector,
             o.HoverSelectsItem,
@@ -346,6 +348,27 @@ export default class AATWS extends ExtensionPreferences {
             _('Immediately enables type-to-search functionality upon switcher pop-up. Use hotkeys while holding down the Shift key'),
             itemFactory.newSwitch(),
             'switcherPopupStartSearch'
+        );
+
+        optDict.RequireEnter = itemFactory.getRowWidget(
+            _('Require Enter to Activate'),
+            _('Keeps keyboard-triggered switchers open after modifier release, except for quick switches. Press Enter to activate the selected result or Esc to dismiss'),
+            itemFactory.newSwitch(),
+            'switcherPopupRequireEnter'
+        );
+
+        const quickSwitchTimeoutScale = itemFactory.newScale(new Gtk.Adjustment({
+            lower: 0,
+            upper: 1000,
+            step_increment: 10,
+            page_increment: 100,
+        }));
+        quickSwitchTimeoutScale.add_mark(250, Gtk.PositionType.TOP, null);
+        optDict.QuickSwitchTimeout = itemFactory.getRowWidget(
+            _('Quick Switch Timeout (ms)'),
+            _('With Require Enter enabled, release Alt within this time to switch immediately. Hold longer to keep the switcher open for search. Lower values shorten the quick-switch window. The default is 250 ms. Set to 0 to always require Enter. Does not apply to the Super overlay key'),
+            quickSwitchTimeoutScale,
+            'switcherPopupQuickSwitchTimeout'
         );
 
         optDict.WraparoundSelector = itemFactory.getRowWidget(
