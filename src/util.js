@@ -276,6 +276,10 @@ export const WindowPreview = GObject.registerClass({
         this._caption.visible = !!text;
     }
 
+    get window() {
+        return this._window;
+    }
+
     set window(w) {
         if (this._window === w)
             return;

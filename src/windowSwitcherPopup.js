@@ -158,7 +158,8 @@ export const WindowSwitcherPopup = {
                 const actorAtCoords =
                     global.stage.get_actor_at_pos(Clutter.PickMode.REACTIVE, coords.x, coords.y);
 
-                return this._isActorOutside(actorAtCoords);
+                return this._isActorOutside(actorAtCoords) &&
+                    !this._isPointerOnPreview(coords.x, coords.y);
             });
             longPressGesture.connect('recognize', () => {
                 // User clicked outside
@@ -1843,9 +1844,32 @@ export const WindowSwitcherPopup = {
 
     _connectMouseHandler() {
         this.connect('button-press-event', (actor, event) => {
+            // The live preview is below the modal popup, so its clicks arrive
+            // here as background presses rather than on the preview actor.
+            const [x, y] = event.get_coords();
+            if (event.get_button() === Clutter.BUTTON_PRIMARY && this._isPointerOnPreview(x, y)) {
+                this._finish(true);
+                return Clutter.EVENT_STOP;
+            }
+
             const action = this._inputHandler.getButtonPressAction(event);
             return this._triggerAction(action);
         });
+    },
+
+    _isPointerOnPreview(x, y) {
+        const window = this._winPreview?.window;
+        if (!window)
+            return false;
+
+        // Item buttons retain priority where the switcher overlaps the preview.
+        const actor = global.stage.get_actor_at_pos(Clutter.PickMode.REACTIVE, x, y);
+        if (actor && this._switcherList?.contains(actor))
+            return false;
+
+        const rect = window.get_frame_rect();
+        return x >= rect.x && x < rect.x + rect.width &&
+            y >= rect.y && y < rect.y + rect.height;
     },
 
     _onItemBtnPressEvent(actor, event) {

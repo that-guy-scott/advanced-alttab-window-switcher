@@ -10,11 +10,17 @@ let modifiers = 0;
 let now = 1000;
 let timerCallback;
 let timerId = 0;
+let pointerActor;
 const removedTimers = [];
 const context = vm.createContext({
     Date: { now: () => now },
-    global: { get_pointer: () => [0, 0, modifiers] },
-    Clutter: { EVENT_STOP: true },
+    global: {
+        get_pointer: () => [0, 0, modifiers],
+        stage: { get_actor_at_pos: () => pointerActor },
+    },
+    Clutter: { EVENT_STOP: true, BUTTON_PRIMARY: 1, PickMode: { REACTIVE: 1 } },
+    Enum: { Actions: { ACTIVATE: 2, HIDE: 13 } },
+    Util: { shiftPressed: () => false, ctrlPressed: () => false },
     GLib: {
         timeout_add(priority, interval, callback) {
             timerCallback = callback;
@@ -172,5 +178,42 @@ classic.release();
 assert.equal(classic.finished, 1, 'classic mode activates on release regardless of timing');
 assert.equal(classic._resetNoModsTimeoutOrFinish('', 8), true);
 assert.equal(classic.finished, 2, 'classic mode retains the early-release race check');
+
+// The full-size preview is under the modal popup: its presses must activate
+// the selected result instead of invoking the configured outside-click action.
+opt.REQUIRE_ENTER = true;
+const click = popup();
+let press;
+let activatedWindow;
+let backgroundPresses = 0;
+const selectedWindow = { get_frame_rect: () => ({ x: 10, y: 20, width: 400, height: 300 }) };
+click._items = [{ _isWindow: true, window: selectedWindow }];
+click._winPreview = { window: selectedWindow };
+const thumbnail = {};
+click._switcherList = { contains: actor => actor === thumbnail };
+click._inputHandler = {
+    getButtonPressAction() { backgroundPresses++; return 13; },
+};
+click._finish = function () { activatedWindow = this._getSelectedTarget(); };
+click.connect = (name, handler) => { if (name === 'button-press-event') press = handler; };
+click._connectMouseHandler();
+pointerActor = {};
+const event = (x, y, button = 1) => ({ get_coords: () => [x, y], get_button: () => button });
+assert.equal(press(click, event(100, 100)), true);
+assert.equal(activatedWindow, selectedWindow, 'preview click activates the selected window');
+assert.equal(backgroundPresses, 0, 'preview click bypasses outside dismissal');
+assert.equal(click.dismissed, 0);
+for (const [x, y] of [[9, 100], [410, 100], [100, 19], [100, 320]])
+    assert.equal(click._isPointerOnPreview(x, y), false, 'points beyond preview bounds are outside');
+press(click, event(500, 500));
+assert.equal(backgroundPresses, 1, 'outside clicks retain their configured action');
+press(click, event(100, 100, 3));
+assert.equal(backgroundPresses, 2, 'secondary clicks retain their configured action');
+pointerActor = thumbnail;
+assert.equal(click._isPointerOnPreview(100, 100), false, 'overlapping switcher items retain priority');
+click._winPreview = null;
+pointerActor = {};
+press(click, event(100, 100));
+assert.equal(backgroundPresses, 3, 'a hidden preview cannot intercept clicks');
 
 console.log('Switcher activation tests passed');

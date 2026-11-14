@@ -15,7 +15,8 @@ git diff --check
 The activation suite checks quick modifier release (including release before the
 keyboard grab), the timeout boundary, slow release followed by search updates,
 explicit search, disabling quick switching, and Super overlay activation. It also
-checks empty search results, mouse timeouts, and classic activation on release.
+checks empty search results, mouse timeouts, classic activation on release, and
+clicking the full-size window preview without triggering outside dismissal.
 
 The D-Bus suite runs on an isolated session bus. It tests sender separation,
 private/invalid tabs, snapshot replacement, directed activation and disconnect
@@ -39,6 +40,10 @@ For manual verification in GNOME:
    a quick tap stays open; restore 250 ms. Close and reopen preferences to confirm
    the value persists. Confirm the Super overlay key still opens search without
    activating.
+   With the switcher staying open after releasing Alt, Tab to one window, then
+   click its large live preview: that window should receive focus. Click outside
+   the preview and switcher to confirm dismissal still works. Repeat with the
+   switcher overlapping the preview; thumbnail clicks should retain their behavior.
 2. Install the built AATWS package and the companion as described in
    `browser-extension/README.md`. Open two browser windows with several tabs.
 3. Search a background tab by title or URL; select it using Enter and then by mouse.
